@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: sp2
+  profiles:
+    active: "@spring.profiles.activate@"
+
+management:
+  endpoint:
+    web:
+      exposure:
+        include: '*'
+
+logging:
+  level:
+    root: INFO
+    web: INFO
