@@ -1,6 +1,6 @@
 spring:
   profiles:
-    activate:
+    active:
       on-profile: prod
   devtools:
     add-properties: true

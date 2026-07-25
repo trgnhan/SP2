@@ -17,7 +17,7 @@ import java.util.List;
 
 @Configuration
 @Profile({"dev", "test"})
-public class AppConfig {
+public class OpenAPIConfig {
     @Bean
     public GroupedOpenApi publicApi(@Value("${springdoc.api-docs.enabled}") String apiDocs) {
         return GroupedOpenApi.builder()

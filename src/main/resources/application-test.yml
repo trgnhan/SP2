@@ -1,6 +1,6 @@
 spring:
   profiles:
-    activate:
+    active:
       on-profile: test
   devtools:
     add-properties: true

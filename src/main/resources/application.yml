@@ -2,7 +2,7 @@ spring:
   application:
     name: sp2
   profiles:
-    active: "@spring.profiles.activate@"
+    active: "@spring.profiles.active@"
 
 management:
   endpoint:
