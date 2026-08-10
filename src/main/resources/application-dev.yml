@@ -15,6 +15,9 @@ spring:
     show_sql: true
     hibernate:
       ddl-auto: none
+  sendgrid:
+    api-key: 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
+    from-email: nhanbh1004@gmail.com
 
 
 server:
