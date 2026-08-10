@@ -1,5 +1,6 @@
 package com.nhan.sp2.controller;
 
+import com.nhan.sp2.common.util.Gender;
 import com.nhan.sp2.dto.request.UserPasswordRequest;
 import com.nhan.sp2.dto.request.UserRequest;
 import com.nhan.sp2.dto.response.ResponseData;
@@ -35,7 +36,7 @@ public class MockupUserController {
         UserResponse userResponse1 = new UserResponse(
                 1l,
                 "list",
-                "Smith","Nam",
+                "Smith", Gender.MALE,
                 new Date(2,2,2000),
                 "Jack",
                 "jsmith@gmail.com",
@@ -43,7 +44,7 @@ public class MockupUserController {
         UserResponse userResponse2 = new UserResponse(
                 1l,"ro",
                 "naldo",
-                "Nam",
+                Gender.MALE,
                 new Date(9,9,1999),
                 "ronaldo",
                 "a7@gmail.com",
@@ -61,7 +62,7 @@ public class MockupUserController {
         UserResponse userResponse2 = new UserResponse(
                 1l,"detail",
                 "naldo",
-                "Nam",
+                Gender.MALE,
                 new Date(9,9,1999),
                 "ronaldo",
                 "a7@gmail.com",

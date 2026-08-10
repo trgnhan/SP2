@@ -1,22 +1,23 @@
 package com.nhan.sp2.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import com.nhan.sp2.common.util.Gender;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Date;
 
 @Getter
+@Setter
+@Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class UserResponse implements Serializable {
     private Long id;
     private String firstName;
     private String lastName;
-    private String gender;
+    private Gender gender;
     private Date birthday;
-    private String userName;
+    private String username;
     private String email;
     private String phone;
 
