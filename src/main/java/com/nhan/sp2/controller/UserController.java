@@ -1,5 +1,6 @@
 package com.nhan.sp2.controller;
 
+import com.nhan.sp2.dto.request.AddUserRequest;
 import com.nhan.sp2.dto.request.UserPasswordRequest;
 import com.nhan.sp2.dto.request.UserRequest;
 import com.nhan.sp2.dto.response.ResponseData;
@@ -7,6 +8,8 @@ import com.nhan.sp2.dto.response.UserResponse;
 import com.nhan.sp2.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @Validated
@@ -44,10 +49,23 @@ public class UserController {
 
     @Operation(summary = "Create user" , description = "API add new user to db")
     @PostMapping("/add")
-    public ResponseData<?> addUser(@RequestBody @Valid UserRequest userRequest) {
+    public ResponseData<?> addUser(@RequestBody @Valid AddUserRequest userRequest) {
         log.info("Request add user with first name : {}",userRequest.getFirstName());
         Long userId = userService.addUser(userRequest);
         return new ResponseData<>(HttpStatus.CREATED.value(),"Add user successfully",userId);
+    }
+
+    @Operation(summary = "Confirm Email" , description = "API check secretCode from db")
+    @GetMapping("/confirm-email")
+    public void confirmEmail(@RequestParam String secretCode, HttpServletResponse response) throws IOException {
+        log.info("Request confirm email with secretCode : {}",secretCode);
+        try {
+            // TODO check or compare secrectCode from database
+        } catch (Exception e){
+            log.error("Confirm email was failure!, errorMessage={}",e.getMessage());
+        } finally {
+            response.sendRedirect("https://www.google.com/");
+        }
     }
 
     @Operation(summary = "Update user" , description = "API update user to db")

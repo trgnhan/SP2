@@ -1,6 +1,7 @@
 package com.nhan.sp2.service.impl;
 
 import com.nhan.sp2.common.util.UserStatus;
+import com.nhan.sp2.dto.request.AddUserRequest;
 import com.nhan.sp2.dto.request.UserPasswordRequest;
 import com.nhan.sp2.dto.request.UserRequest;
 import com.nhan.sp2.dto.response.PageResponse;
@@ -10,6 +11,7 @@ import com.nhan.sp2.model.Address;
 import com.nhan.sp2.model.User;
 import com.nhan.sp2.repository.AddressRepository;
 import com.nhan.sp2.repository.UserRepository;
+import com.nhan.sp2.service.EmailService;
 import com.nhan.sp2.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,8 @@ public class UserServiceImpl implements UserService {
     private final AddressRepository addressRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final EmailService emailService;
 
     @Override
     public UserResponse getUser(Long userId) {
@@ -120,7 +124,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public long addUser(UserRequest userRequest) {
+    public long addUser(AddUserRequest userRequest) {
         log.info("Adding user: {}", userRequest);
         User user = new User();
         user.setFirstName(userRequest.getFirstName());
@@ -153,6 +157,15 @@ public class UserServiceImpl implements UserService {
             addressRepository.saveAll(addresses);
             log.info("Address save: {}, from userId :{}", addresses, user.getId());
         }
+
+        // Send email
+        try {
+            emailService.emailVerification(userRequest.getEmail(), userRequest.getUsername());
+            log.info("mail: {}",userRequest.getEmail());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         log.info("User added , userId: {}", user.getId());
         return user.getId();
     }

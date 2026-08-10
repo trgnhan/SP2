@@ -1,5 +1,6 @@
 package com.nhan.sp2.service;
 
+import com.nhan.sp2.dto.request.AddUserRequest;
 import com.nhan.sp2.dto.request.UserPasswordRequest;
 import com.nhan.sp2.dto.request.UserRequest;
 import com.nhan.sp2.dto.response.PageResponse;
@@ -13,7 +14,7 @@ public interface UserService {
 
     PageResponse<?> getListUser(String keyword, String sort, int pageNo, int pageSize);
 
-    long addUser(UserRequest userRequest);
+    long addUser(AddUserRequest userRequest);
 
     void updateUser(UserRequest userRequest);
 
