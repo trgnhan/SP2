@@ -10,8 +10,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,7 +24,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity(name = "User")
 @Table(name = "tbl_user")
-public class User extends AbstractEntity{
+public class User extends AbstractEntity implements UserDetails, Serializable {
 
     @Column(name = "first_name", length = 255)
     private String firstName;
@@ -56,4 +61,28 @@ public class User extends AbstractEntity{
     private UserStatus status;
 
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserStatus.ACTIVE.equals(status);
+    }
 }
