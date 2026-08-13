@@ -21,6 +21,13 @@ spring:
     template-id: ${TEMPLATE_ID}
     verification-link: ${http://localhost:80/user/confirm-email}
 
+jwt:
+  secretKey: ${SECRET_KEY}
+  keyAccessToken: ${KEY_ACCESS_TOKEN}
+  keyRefreshToken: ${KEY_REFRESH_TOKEN}
+  expiryMinutes: ${EXPIRY_MINUTES}
+  expiryDAY: ${EXPIRY_DAY}
+
 
 server:
   port: 80

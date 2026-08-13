@@ -2,6 +2,7 @@ package com.nhan.sp2.controller;
 
 import com.nhan.sp2.dto.request.SignInRequest;
 import com.nhan.sp2.dto.response.TokenResponse;
+import com.nhan.sp2.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +21,17 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication Controller")
 public class AuthenticationController {
 
+    private final AuthenticationService authenticationService;
+
     @Operation(summary = "Access token", description = "Get access token and refresh token by username and password")
     @PostMapping("/access-token")
     public TokenResponse getAccessToken(@RequestBody SignInRequest request){
         log.info("Access token request");
-        return TokenResponse.builder()
-                .accessToken("DUMMY-ACCESS-TOKEN")
-                .refreshToken("DUMMY-REFRESH-TOKEN")
-                .build();
+//        return TokenResponse.builder()
+//                .accessToken("DUMMY-ACCESS-TOKEN")
+//                .refreshToken("DUMMY-REFRESH-TOKEN")
+//                .build();
+        return authenticationService.getAccessToken(request);
     }
 
     @Operation(summary = "Refresh token", description = "Get new access token by refresh token")

@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(userRequest.getUsername());
         user.setType(userRequest.getType());
         // khi moi tao thi none -> confirm thi none -> active
-        user.setStatus(UserStatus.NONE);
+        user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
 
         if (user.getId()!= null){

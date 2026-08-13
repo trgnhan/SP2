@@ -21,5 +21,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "or lower(u.username) like :keyword )")
     Page<User> searchByKeyword(String keyword, Pageable pageable);
 
-    UserDetails findByUsername(String s);
+    User findByUsername(String s);
 }
