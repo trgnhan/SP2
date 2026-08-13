@@ -3,6 +3,7 @@ package com.nhan.sp2.configuration;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nhan.sp2.common.util.TokenType;
+import com.nhan.sp2.exception.ErrorResponse;
 import com.nhan.sp2.service.JwtService;
 import com.nhan.sp2.service.UserServiceDetail;
 import jakarta.servlet.FilterChain;
@@ -15,10 +16,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -28,6 +29,7 @@ import java.util.Date;
 
 @Component
 @Slf4j(topic = "CUSTOMIZE-REQUEST-FILTER")
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class CustomizeRequestFilter extends OncePerRequestFilter {
 
@@ -46,13 +48,13 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
 
             String username="";
             try {
-                username = jwtService.extracUsername(authorization, TokenType.ACCESS_TOKEN);
+                username = jwtService.extractUsername(authorization, TokenType.ACCESS_TOKEN);
                 log.info("username: {}", username);
             } catch (AccessDeniedException e) {
                 log.error("Access Dined, message ={}",e.getMessage());
-                response.setStatus(HttpServletResponse.SC_OK);
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.setCharacterEncoding("UTF-8");
-                response.getWriter().write(errorResponse(e.getMessage()));
+                response.getWriter().write(errorResponse(e.getMessage(),request.getRequestURI()));
                 return;
             }
 
@@ -72,12 +74,13 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String errorResponse (String message){
+    private String errorResponse (String message, String path){
         try{
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.setTimestamp(new Date());
             errorResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
             errorResponse.setMessage(message);
+            errorResponse.setPath(path);
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             return gson.toJson(errorResponse);
@@ -86,13 +89,4 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
         }
     }
 
-    @Getter
-    @Setter
-    private class ErrorResponse {
-        private Date timestamp;
-        private int status;
-        private String error;
-        private String message;
-
-    }
 }

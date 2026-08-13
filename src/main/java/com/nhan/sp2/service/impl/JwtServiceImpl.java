@@ -18,10 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -42,25 +39,23 @@ public class JwtServiceImpl implements JwtService {
     private String keyRefreshToken;
 
     @Override
-    public String generateAccessToken(long userId, String username, Collection<? extends GrantedAuthority> authorities) {
-        log.info("Generate access token for user {} with authorities {}", userId, authorities);
+    public String generateAccessToken(String username, List<String>  authorities) {
+        log.info("Generate access token for username {} with authorities {}", username,authorities);
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
         claims.put("role", authorities);
         return generateToken(claims,username);
     }
 
     @Override
-    public String generateRefreshToken(long userId, String username, Collection<? extends GrantedAuthority> authorities) {
-        log.info("Generate refresh token for user {} with authorities {}", userId, authorities);
+    public String generateRefreshToken(String username, List<String> authorities) {
+        log.info("Generate refresh token for username {} with authorities {}", username ,authorities);
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
         claims.put("role", authorities);
         return generateRefreshToken(claims,username);
     }
 
     @Override
-    public String extracUsername(String token, TokenType tokenType) {
+    public String extractUsername(String token, TokenType tokenType) {
         log.info("Extract username from token");
         return extractClaims(tokenType,token,Claims::getSubject);
     }
@@ -85,7 +80,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     private String generateToken(Map<String, Object> claims, String username){
-        log.info("Generate access token for user {} with claims {}", username, claims);
+        log.info("---------------[ generate token ]-------------");
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
@@ -96,7 +91,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     private String generateRefreshToken(Map<String, Object> claims, String username){
-        log.info("Generate access token for user {} with claims {}", username, claims);
+        log.info("---------------[ refresh token ]-------------");
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)

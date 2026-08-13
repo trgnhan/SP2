@@ -4,27 +4,24 @@ import com.nhan.sp2.common.util.Gender;
 import com.nhan.sp2.common.util.UserStatus;
 import com.nhan.sp2.common.util.UserType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "User")
 @Table(name = "tbl_user")
-public class User extends AbstractEntity implements UserDetails, Serializable {
+public class User extends AbstractEntity<Long> implements UserDetails, Serializable {
 
     @Column(name = "first_name", length = 255)
     private String firstName;
@@ -60,10 +57,25 @@ public class User extends AbstractEntity implements UserDetails, Serializable {
     @Column(name = "status", length = 255)
     private UserStatus status;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Builder.Default
+    private Set<UserHasRole> roles = new HashSet<>();
+
+    @OneToMany
+    @Builder.Default
+    private Set<GroupHasUser> groups = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+
+        // get role
+        List<Role> roleList = roles.stream().map(UserHasRole::getRole).toList();
+
+        // get role name
+        List<String> roleNames = roleList.stream().map(Role::getName).toList();
+
+        // add role name to authority
+        return roleNames.stream().map(SimpleGrantedAuthority::new).toList();
     }
 
     @Override

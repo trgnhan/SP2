@@ -15,6 +15,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.nhan.sp2.common.util.TokenType.REFRESH_TOKEN;
+
 @Service
 @Slf4j(topic = "AUTHENTICATION-SERVICE")
 @RequiredArgsConstructor
@@ -28,10 +33,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public TokenResponse getAccessToken(SignInRequest request) {
         log.info("Get access token");
 
+        List<String> authorities = new ArrayList<>();
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+            Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authenticate);
+            log.info("isAuthenticated: {}", authenticate.isAuthenticated());
+            log.info("Authorities: {}", authenticate.getAuthorities().toString());
+            authorities.add(authenticate.getAuthorities().toString());
+
+            SecurityContextHolder.getContext().setAuthentication(authenticate);
         } catch (AuthenticationException e) {
             log.error("Login fail!, message= {}",e.getMessage());
             throw new AccessDeniedException(e.getMessage());
@@ -39,12 +50,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         var user = userRepository.findByUsername(request.getUsername());
 
-        if (user == null) {
-            throw new AccessDeniedException("User not found");
-        }
-
-        String accessToken =  jwtService.generateAccessToken(user.getId(),request.getUsername(),  user.getAuthorities());
-        String refreshToken =  jwtService.generateRefreshToken(user.getId(),request.getUsername(),  user.getAuthorities());
+        String accessToken =  jwtService.generateAccessToken(request.getUsername(),authorities);
+        String refreshToken =  jwtService.generateRefreshToken(request.getUsername(), authorities);
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
@@ -55,6 +62,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public TokenResponse getRefreshToken(String request) {
         log.info("Get refresh token");
-        return null;
+
+        try {
+            String username = jwtService.extractUsername(request, REFRESH_TOKEN);
+
+            var user = userRepository.findByUsername(username);
+            if (user == null) {
+                log.error("User not found for username: {}", username);
+                throw new AccessDeniedException("User not found");
+            }
+
+            List<String> authorities = new ArrayList<>();
+
+            if (user.getAuthorities() != null) {
+                user.getAuthorities().forEach(authority ->
+                        authorities.add(authority.getAuthority())
+                );
+            }
+
+            String newAccessToken = jwtService.generateAccessToken(username, authorities);
+            String newRefreshToken = jwtService.generateRefreshToken(username, authorities);
+
+            return TokenResponse.builder()
+                    .accessToken(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Get refresh token fail!, message= {}", e.getMessage());
+            throw new AccessDeniedException("Invalid refresh token: " + e.getMessage());
+        }
     }
 }

@@ -15,6 +15,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,7 @@ public class UserController {
 
     @Operation(summary = "Get user list" , description = "API retrieve user from db")
     @GetMapping("/list")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OWNER')")
     public ResponseData<?> getList(@RequestParam(required = false) String keyword,
                                       @RequestParam(required = false) String sort,
                                       @RequestParam(defaultValue = "0") int pageNo,
@@ -43,12 +45,15 @@ public class UserController {
     }
     @Operation(summary = "Get user detail" , description = "API retrieve user detail by id")
     @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OWNER','USER')")
+
     public ResponseData<UserResponse> getUserDetail(@PathVariable @Min(value = 1, message = "userId must be equal or greater than 1") Long userId) {
         return new ResponseData<>(HttpStatus.OK.value(),"user ",userService.getUser(userId));
     }
 
     @Operation(summary = "Create user" , description = "API add new user to db")
     @PostMapping("/add")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OWNER')")
     public ResponseData<?> addUser(@RequestBody @Valid AddUserRequest userRequest) {
         log.info("Request add user with first name : {}",userRequest.getFirstName());
         Long userId = userService.addUser(userRequest);
@@ -70,6 +75,7 @@ public class UserController {
 
     @Operation(summary = "Update user" , description = "API update user to db")
     @PutMapping("/update")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OWNER')")
     public ResponseData<?> updateUser(@RequestBody @Valid UserRequest userRequest) {
         log.info("Request update user with user : {}",userRequest);
         userService.updateUser(userRequest);
@@ -78,6 +84,7 @@ public class UserController {
 
     @Operation(summary = "Change password" , description = "API change password user to db")
     @PatchMapping("/change-password")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OWNER')")
     public ResponseData<?> changePasswordUser(@RequestBody @Valid UserPasswordRequest userPasswordRequest) {
         log.info("Request change password user with userId : {}",userPasswordRequest.getId());
         userService.changePasswordUser(userPasswordRequest);
@@ -86,9 +93,10 @@ public class UserController {
 
     @Operation(summary = "Delete user" , description = "API delete user to db")
     @DeleteMapping("/delete/{userId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OWNER')")
     public ResponseData<?> deleteUser(@PathVariable("userId") @Min(1) Long userId) {
         log.info("Request delete user with userId : {}",userId);
-        userService.deleteUser(userId);
+        //userService.deleteUser(userId);
         return new ResponseData<>(HttpStatus.RESET_CONTENT.value(), "Delete user successfully",userId);
     }
 }

@@ -3,18 +3,18 @@ package com.nhan.sp2.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.io.Serializable;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "Adress")
+@Entity(name = "Address")
 @Table(name = "tbl_address")
-public class Address extends AbstractEntity{
+public class Address extends AbstractEntity<Integer> implements Serializable {
 
     @Column(name = "apartment_number")
     private String apartmentNumber;
