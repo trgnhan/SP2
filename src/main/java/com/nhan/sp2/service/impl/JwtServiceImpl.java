@@ -71,7 +71,7 @@ public class JwtServiceImpl implements JwtService {
 
         try{
             return Jwts.parser()
-                    .setSigningKey(keyAccessToken)
+                    .setSigningKey(getKey(tokenType))
                     .parseClaimsJws(token)
                     .getBody();
         }catch (SignatureException | ExpiredJwtException e) {

@@ -1,7 +1,11 @@
 package com.nhan.sp2.configuration;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.nhan.sp2.exception.ErrorResponse;
 import com.nhan.sp2.service.UserServiceDetail;
 import com.sendgrid.SendGrid;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +24,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Date;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -40,7 +46,26 @@ public class AppConfig {
                 .authorizeHttpRequests(request -> request.requestMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
-                .authenticationProvider(authenticationProvider()).addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class);
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class)
+                // fix bug khi k nhap authorization thi no se tra ve loi 403
+                // nhung trong body lai k co noi dung cu the gi ca
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+
+                            ErrorResponse errorResponse = new ErrorResponse();
+                            errorResponse.setTimestamp(new Date());
+                            errorResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            errorResponse.setPath(request.getRequestURI());
+                            errorResponse.setError("Forbidden");
+                            errorResponse.setMessage("Access is denied");
+
+                            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").setPrettyPrinting().create();
+                            response.getWriter().write(gson.toJson(errorResponse));
+                        }));
         return http.build();
     }
 

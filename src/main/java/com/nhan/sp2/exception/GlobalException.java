@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.awt.*;
 import java.util.Date;
 
 import static org.springframework.http.HttpStatus.*;
@@ -87,10 +89,42 @@ public class GlobalException {
 
         return errorResponse;
     }
+    // 401 - Unauthorized - Xac thuc dang nhap cho tai khoan / mat khau that bai
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(UNAUTHORIZED)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = {@Content(mediaType = APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "401 Response",
+                                    summary = "Handle exception when Unauthorized",
+                                    value = """
+                                        {
+                                          "timestamp": "2023-10-19T06:07:35.321+00:00",
+                                          "status": 401,
+                                          "path": "/api/v1/...",
+                                          "error": "Unauthorized",
+                                          "message": "Username or password is incorrect",
+                                        }
+                                        """
+                            ))})
+    })
+    public ErrorResponse handleBadCredentialsException(BadCredentialsException e, WebRequest request) {
+        log.error("========================= handleBadCredentialsException: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date());
+        errorResponse.setStatus(UNAUTHORIZED.value());
+        errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
+        errorResponse.setError(UNAUTHORIZED.getReasonPhrase()); // "Unauthorized" sai xac thuc dang nhap
+        errorResponse.setMessage("Username or password is incorrect");
+
+        return errorResponse;
+    }
 
     // 400 - Bad Request
     @ExceptionHandler({MethodArgumentNotValidException.class, MissingServletRequestParameterException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+
     public ErrorResponse handleValidationException(Exception e, WebRequest request) {
         log.error("========================= handleValidationException : {}", e.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();

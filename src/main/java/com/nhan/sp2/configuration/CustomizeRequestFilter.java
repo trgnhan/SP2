@@ -16,7 +16,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,7 +29,7 @@ import java.util.Date;
 
 @Component
 @Slf4j(topic = "CUSTOMIZE-REQUEST-FILTER")
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class CustomizeRequestFilter extends OncePerRequestFilter {
 
@@ -54,6 +54,7 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
                 log.error("Access Dined, message ={}",e.getMessage());
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.setCharacterEncoding("UTF-8");
+                response.setContentType("application/json");
                 response.getWriter().write(errorResponse(e.getMessage(),request.getRequestURI()));
                 return;
             }
@@ -79,7 +80,8 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.setTimestamp(new Date());
             errorResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            errorResponse.setMessage(message);
+            errorResponse.setMessage("Forbidden with check access_token is false. Detail : "+message);
+            errorResponse.setError("Forbidden");
             errorResponse.setPath(path);
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
